@@ -1,0 +1,28 @@
+---
+- hosts: localhost
+  vars:
+    from: "camelot"
+
+  vars_prompt:
+    - name: site
+      prompt: "Site to deploy?"
+      default: dev
+
+
+  tasks:
+  - name: indexed loop demo
+    debug: msg="at array position {{ item.0 }} there is a value {{ item.1 }}"
+    with_indexed_items: sites
+
+  
+  tasks:
+  - name: test
+    ping:
+
+- hosts: webservers
+  user: root
+
+  tasks:
+  - name: test webhosts
+    ping:
+

@@ -1,0 +1,28 @@
+# Ansible playbook to deploy dev environment
+#
+---
+- hosts: webservers
+  user: root
+
+  vars_files:
+    - private/project-settings.yml
+
+  vars_prompt:
+    - name: site_to_deploy
+      prompt: "Which site would you like to deploy?"
+      default: dev
+      private: no
+
+  tasks:
+    - name: "Checking variables"
+      fail: msg="No site to deploy defined"
+      when: sites[site_to_deploy] is not defined
+    - debug: msg="Deploy is {{ site_to_deploy }}"
+    - debug: msg="Variables of site to deploy {{ sites[site_to_deploy] }}"
+    
+
+    # according to the deploy variable we pass a site declared in project-settings.yml
+    - include: tasks/deploy-drupal.yml site="{{ sites[site_to_deploy] }}"
+
+  handlers:
+    - include: handlers/handlers.yml

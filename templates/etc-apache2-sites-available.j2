@@ -1,0 +1,19 @@
+## Ansible provided setup ##
+
+<VirtualHost *:80>
+  ServerAdmin {{ apache_server_admin }}
+  ServerName {{ site.fqdn }}
+{% if site.alias is defined %}
+  ServerAlias {{ site.alias }}
+{% endif %}
+
+  DocumentRoot /var/www/{{ site.fqdn }}/docroot
+
+  <Directory /var/www/{{ site.fqdn }}/docroot>
+    Options Indexes FollowSymLinks
+    AllowOverride All
+    Order allow,deny
+    allow from all
+  </Directory>
+
+</VirtualHost>

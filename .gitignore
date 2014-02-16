@@ -1,2 +1,5 @@
 hosts
 ansible.cfg
+private/*
+!private/README.md
+

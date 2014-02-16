@@ -1,0 +1,16 @@
+# This are the default handlers to be included in playbooks
+---
+  - name: restart apache
+    action: service name=apache2 state=restarted
+
+  - name: restart mysql
+    action: service name=mysql state=restarted
+
+  - name: restart nginx
+    action: service name=nginx state=restarted
+
+  - name: restart solr
+    command: /etc/init.d/jetty restart
+
+  - name: restart sshd
+    service: name=ssh state=restarted

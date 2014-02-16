@@ -1,0 +1,67 @@
+---
+# Site code
+- git: repo="{{ repo }}" dest="{{ webroot }}/{{ fqdn }}" version="{{ branch }}"
+
+- file: path="{{ fileroot }}"/"{{ fqdn }}"/files state=directory owner=www-data group=www-data mode=2770
+
+- file: path="{{ webroot }}"/"{{ fqdn }}"/webroot state=directory owner=root group=www-data mode=0750
+
+- file: path="{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}" state=directory owner=root group=www-data mode=0750
+
+- template: src=templates/{{ drupal_version }}-settings.php.j2 dest="{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/settings.php
+
+# chmod 2770 files dir
+- file: path="{{ fileroot }}"/"{{ fqdn }}"/files mode=2770 state=directory
+
+- file: dest="{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/files src="{{ fileroot }}"/"{{ fqdn }}"/files state=link
+
+- file: path="{{ webroot }}"/"{{ fqdn }}"/webroot/sites/default state=absent
+
+# find . -wholename "./sites/default/files" -prune -or  \( ! -user root -or ! -group www-data \) -exec chown root:www-data { }}" \;
+- command: find "{{ webroot }}"/"{{ fqdn }}"/webroot -wholename ""{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/files" -prune -or  \( ! -user root -or ! -group www-data \) -exec chown root:www-data { }}" \;
+  tags: fixperm
+
+# find . -wholename "./sites/default/files" -prune -or  \( -type d -and ! -perm u=rwx,g=rxs,o= \) -exec chmod u=rwx,g=rxs,o= { }}" \;
+- command: find "{{ webroot }}"/"{{ fqdn }}"/webroot -wholename ""{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/files" -prune -or  \( -type d -and ! -perm u=rwx,g=rxs,o= \) -exec chmod u=rwx,g=rxs,o= { }}" \;
+  tags: fixperm
+
+# find . -wholename "./sites/default/files" -prune -or  \( -type f -and ! -perm u=rw,g=r,o= \) -exec chmod u=rw,g=r,o= { }}" \;
+- command: find "{{ webroot }}"/"{{ fqdn }}"/webroot -wholename ""{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/files" -prune -or  \( -type f -and ! -perm u=rw,g=r,o= \) -exec chmod u=rw,g=r,o= { }}" \;
+  tags: fixperm
+
+# find ./sites/default/files \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data { }}" \;
+- command: find "{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/files \( ! -user www-data -or ! -group www-data \) -exec chown www-data:www-data { }}" \;
+  tags: fixperm
+
+# find ./sites/default/files \( -type d -and ! -perm u=rwx,g=rwxs,o= \) -exec chmod u=rwx,g=rwxs,o= { }}" \;
+- command: find "{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/files \( -type d -and ! -perm u=rwx,g=rwxs,o= \) -exec chmod u=rwx,g=rwxs,o= { }}" \;
+  tags: fixperm
+
+# find ./sites/default/files \( -type f -and ! -perm u=rw,g=rw,o= \) -exec chmod u=rw,g=rw,o= { }}" \;
+- command: find "{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/files \( -type f -and ! -perm u=rw,g=rw,o= \) -exec chmod u=rw,g=rw,o= { }}" \;
+  tags: fixperm
+
+# chmod 440 sites/default/settings.php
+- file: mode=0440 path="{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}"/settings.php
+  tags: fixperm
+
+- file: dest="{{ webroot }}"/"{{ fqdn }}"/webroot/sites/default src="{{ webroot }}"/"{{ fqdn }}"/webroot/sites/"{{ fqdn }}" state=link
+
+# MySQL configuration
+- mysql_db: db="{{ db_name }}" state=present
+  tags: mysql
+
+- mysql_user: name="{{ db_user }}" password="{{ db_pass }}" priv="{{ db_name }}".*:ALL state=present
+  tags: mysql
+
+# Apache conf
+- template: src=templates/etc-apache2-sites-available.j2 dest=/etc/apache2/sites-available/"{{ fqdn }}"
+  notify: restart apache
+  tags: apache
+
+- command: a2ensite "{{ fqdn }}" creates=/etc/apache2/sites-enabled/"{{ fqdn }}"
+  notify: restart apache
+  tags: apache
+
+
+
