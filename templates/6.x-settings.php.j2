@@ -3,10 +3,10 @@
 $db_url = 'mysqli://{{ site.db_user }}:{{ site.db_pass }}@localhost/{{ site.db_name }}';
 $db_prefix = '{{ site.db_prefix|default('') }}';
 
-$update_free_access = {{ site.db_prefix|default('') }};
+$update_free_access = {{ site.update_free_access|default('FALSE') }};
 
 
-# @TODO: remove this from template 
+# @TODO: remove this from template
 # This are specific to a project I am working with and testing
 
 ini_set('arg_separator.output',     '&amp;');

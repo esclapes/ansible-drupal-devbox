@@ -1,9 +1,11 @@
---- # Site code
-#- git: repo="{{ site.repo }}" dest="{{ webroot }}/{{ site.fqdn }}" version="{{ site.branch }}" force="yes"
+---
+# Site code
+- name: Checkout {{ site.branch }} from {{ site.repo }} into {{ webroot }}/{{ site.fqdn }}
+  git: repo="{{ site.repo }}" dest="{{ webroot }}/{{ site.fqdn }}" version="{{ site.branch }}" accept_hostkey="yes" depth=1
 
 - file: path="{{ fileroot }}"/"{{ site.fqdn }}"/files state=directory owner=www-data group=www-data mode=2770
 
-- file: path="{{ webroot }}"/"{{ site.fqdn }}"/webroot state=directory owner=root group=www-data mode=0750
+- file: path="{{ webroot }}"/"{{ site.fqdn }}"/docroot state=directory owner=root group=www-data mode=0750
 
 - file: path="{{ webroot }}"/"{{ site.fqdn }}"/docroot/sites/"{{ site.fqdn }}" state=directory owner=root group=www-data mode=0750
 
@@ -28,6 +30,8 @@
 
 - mysql_user: name="{{ site.db_user }}" password="{{ site.db_pass }}" priv="{{ site.db_name }}".*:ALL state=present
   tags: mysql
+
+- mysql_user: name="{{ site.remove_db_user }}" password="{{ site.remove_db_pass }}" state=absent
 
 # Apache conf
 - template: src=templates/etc-apache2-sites-available.j2 dest="/etc/apache2/sites-available/{{ site.fqdn }}"
