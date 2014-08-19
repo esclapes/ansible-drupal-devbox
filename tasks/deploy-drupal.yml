@@ -1,20 +1,20 @@
 ---
 # Site code
 - name: Checkout {{ site.branch }} from {{ site.repo }} into {{ webroot }}/{{ site.fqdn }}
-  git: repo="{{ site.repo }}" dest="{{ webroot }}/{{ site.fqdn }}" version="{{ site.branch }}" accept_hostkey="yes" depth=1
+  git: repo={{ site.repo }} dest={{ webroot }}/{{ site.fqdn }} version={{ site.branch }} accept_hostkey=yes depth=1
 
-- file: path="{{ fileroot }}"/"{{ site.fqdn }}"/files state=directory owner=www-data group=www-data mode=2770
+- file: path={{ fileroot }}/{{ site.fqdn }}/files state=directory owner=www-data group=www-data mode=2770
 
-- file: path="{{ webroot }}"/"{{ site.fqdn }}"/docroot state=directory owner=root group=www-data mode=0750
+- file: path={{ webroot }}/{{ site.fqdn }}/docroot state=directory owner=root group=www-data mode=0750
 
-- file: path="{{ webroot }}"/"{{ site.fqdn }}"/docroot/sites/"{{ site.fqdn }}" state=directory owner=root group=www-data mode=0750
+- file: path={{ webroot }}/{{ site.fqdn }}/docroot/sites/{{ site.fqdn }} state=directory owner=root group=www-data mode=0750
 
-- template: src=templates/{{ drupal_version }}-settings.php.j2 dest="{{ webroot }}"/"{{ site.fqdn }}"/docroot/sites/"{{ site.fqdn }}"/settings.php
+- template: src=templates/{{ drupal_version }}-settings.php.j2 dest={{ webroot }}/{{ site.fqdn }}/docroot/sites/{{ site.fqdn }}/settings.php
 
 # chmod 2770 files dir
-- file: path="{{ fileroot }}"/"{{ site.fqdn }}"/files mode=2770 state=directory
+- file: path={{ fileroot }}/{{ site.fqdn }}/files mode=2770 state=directory
 
-- file: dest="{{ webroot }}"/"{{ site.fqdn }}"/docroot/sites/"{{ site.fqdn }}"/files src="{{ fileroot }}"/"{{ site.fqdn }}"/files state=link
+- file: dest={{ webroot }}/{{ site.fqdn }}/docroot/sites/{{ site.fqdn }}/files src={{ fileroot }}/{{ site.fqdn }}/files state=link
 
 - file: path={{ webroot }}/{{ site.fqdn }}/docroot/sites/default state=absent
 
@@ -22,23 +22,23 @@
   script: ../scripts/drupal-fix-perms.sh {{ webroot }}/{{ site.fqdn }}/docroot
   tags: fixperm
 
-- file: dest="{{ webroot }}"/"{{ site.fqdn }}"/docroot/sites/default src="{{ webroot }}"/"{{ site.fqdn }}"/docroot/sites/"{{ site.fqdn }}" state=link
+- file: dest={{ webroot }}/{{ site.fqdn }}/docroot/sites/default src={{ webroot }}/{{ site.fqdn }}/docroot/sites/{{ site.fqdn }} state=link
 
 # MySQL configuration
 - mysql_db: db="{{ site.db_name }}" state=present
   tags: mysql
 
-- mysql_user: name="{{ site.db_user }}" password="{{ site.db_pass }}" priv="{{ site.db_name }}".*:ALL state=present
+- mysql_user: name={{ site.db_user }} password={{ site.db_pass }} priv={{ site.db_name }}.*:ALL state=present
   tags: mysql
 
-- mysql_user: name="{{ site.remove_db_user }}" password="{{ site.remove_db_pass }}" state=absent
+- mysql_user: name={{ site.remove_db_user }} password={{ site.remove_db_pass }} state=absent
 
 # Apache conf
-- template: src=templates/etc-apache2-sites-available.j2 dest="/etc/apache2/sites-available/{{ site.fqdn }}"
+- template: src=templates/etc-apache2-sites-available.j2 dest=/etc/apache2/sites-available/{{ site.fqdn }}
   notify: restart apache
   tags: apache
 
-- command: a2ensite "{{ site.fqdn }}" creates="/etc/apache2/sites-enabled/{{ site.fqdn }}"
+- command: a2ensite {{ site.fqdn }} creates=/etc/apache2/sites-enabled/{{ site.fqdn }}
   notify: restart apache
   tags: apache
 
