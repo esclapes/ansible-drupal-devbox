@@ -32,6 +32,8 @@
   tags: mysql
 
 - mysql_user: name={{ site.remove_db_user }} password={{ site.remove_db_pass }} state=absent
+  tags: mysql
+  when: site.remove_db_user is defined and site.remove_db_pass is defined
 
 # Apache conf
 - template: src=templates/etc-apache2-sites-available.j2 dest=/etc/apache2/sites-available/{{ site.fqdn }}
